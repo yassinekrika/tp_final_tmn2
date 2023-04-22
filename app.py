@@ -256,7 +256,7 @@ def zigzag(matrice):
     return li 
 
 zigza_value = zigzag(img_qunt)
-print(len(zigza_value))
+# print(zigza_value)
 
 
 # huffman coding
@@ -275,7 +275,6 @@ class NodeTree(object):
     def __str__(self):
         return '%s_%s' % (self.left, self.right)
 
-
 def hufman_coding(zigza_value):
 
     string = zigza_value
@@ -284,7 +283,7 @@ def hufman_coding(zigza_value):
         codes = {}
 
         def traverse(node, code):
-            if type(node) is str:
+            if type(node) is int or type(node) is np.float64:
                 codes[node] = code
             else:
                 traverse(node.left, code + '0')
@@ -318,6 +317,4 @@ def hufman_coding(zigza_value):
 
     return huffmanCode
 
-hufman = hufman_coding(zigza_value)
-print('huffman coding')
-print(hufman)
+hufman_coding(zigza_value)
