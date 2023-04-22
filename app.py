@@ -162,7 +162,6 @@ appl_masque(img, masque4, 4)
 appl_masque(img, masque5, 5)
 appl_masque(img, masque6, 6)
 
-
 def quantdct(image_data, quant, alpha):
     height, width = image_data.shape
     img = np.zeros((height, width))
@@ -177,9 +176,7 @@ def quantdct(image_data, quant, alpha):
             if (h == 8 and w == 8):
                 transformed_block = cv2.dct(block)
 
-                for i in range(len(quant[0])):
-                    for j in range(len(quant[1])):
-                        transformed_block[i][j] = np.around(transformed_block[i][j] / (quant[i][j] * alpha))
+                transformed_block = np.around(transformed_block / (quant * alpha))
                 
                 img[i:i+block_size, j:j+block_size] = transformed_block
             else:
@@ -256,7 +253,7 @@ def zigzag(matrice):
     return li 
 
 zigza_value = zigzag(img_qunt)
-# print(zigza_value)
+print(zigza_value[1])
 
 
 # huffman coding
@@ -275,7 +272,7 @@ class NodeTree(object):
     def __str__(self):
         return '%s_%s' % (self.left, self.right)
 
-def hufman_coding(zigza_value):
+def huffman_coding(zigza_value):
 
     string = zigza_value
 
@@ -283,7 +280,7 @@ def hufman_coding(zigza_value):
         codes = {}
 
         def traverse(node, code):
-            if type(node) is int or type(node) is np.float64:
+            if type(node) is int or type(node) is np.float64 or type(node) is str:
                 codes[node] = code
             else:
                 traverse(node.left, code + '0')
@@ -301,7 +298,7 @@ def hufman_coding(zigza_value):
             freq[c] = 1
 
     freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)
-    print(freq)
+    
     nodes = freq
 
     while len(nodes) > 1:
@@ -315,6 +312,38 @@ def hufman_coding(zigza_value):
 
     huffmanCode = huffman_code_tree(nodes[0][0])
 
+    print(huffmanCode)
     return huffmanCode
 
-hufman_coding(zigza_value)
+string = 'asdf;lakjfioquwrlksajdfoijz'
+print('Huffman coding : ***************************************')
+huffman_coding(string)
+
+print('Huffman coding not null values : ***************************************')
+not_null_val = []
+for val in zigza_value:
+    if(val != 0.0):
+        not_null_val.append(val)
+
+huffman_coding(not_null_val)
+
+print('Coding null values : ***************************************')
+def encode_message(message):
+    encoded_string = ""
+    i = 0
+    while (i <= len(message)-1):
+        count = 1
+        ch = message[i]
+        j = i
+        while (j < len(message)-1):    
+            if (message[j] == message[j + 1]): 
+                count = count + 1
+                j = j + 1
+            else: 
+                break
+        if (ch == 0.0):
+            encoded_string = encoded_string + str(count) + '#'
+        i = j + 1
+    return encoded_string
+
+print(encode_message(zigza_value))
