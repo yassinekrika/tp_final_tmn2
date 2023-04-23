@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import math
+import os
 
 img = cv2.imread('m.bmp', cv2.IMREAD_GRAYSCALE)
 img_original = cv2.imread('m.bmp', cv2.IMREAD_GRAYSCALE)
@@ -252,8 +253,9 @@ def zigzag(matrice):
         i+=1
     return li 
 
+
 zigza_value = zigzag(img_qunt)
-print(zigza_value[1])
+# print(zigza_value)
 
 
 # huffman coding
@@ -296,7 +298,7 @@ def huffman_coding(zigza_value):
             freq[c] += 1
         else:
             freq[c] = 1
-
+    frequency = freq
     freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)
     
     nodes = freq
@@ -312,24 +314,45 @@ def huffman_coding(zigza_value):
 
     huffmanCode = huffman_code_tree(nodes[0][0])
 
-    print(huffmanCode)
-    return huffmanCode
+    # print(huffmanCode)
+    return huffmanCode, frequency
 
 string = 'asdf;lakjfioquwrlksajdfoijz'
 print('Huffman coding : ***************************************')
 huffman_coding(string)
+only_huffman_coding, only_freq = huffman_coding(zigza_value)
+only_bit_stream = []
+for i in zigza_value:
+    if (i in only_huffman_coding):
+        only_bit_stream.append(only_huffman_coding[i])
+    else:
+        only_bit_stream.append(i)
+print("only_bit_stream")
+# print(only_bit_stream)
 
 print('Huffman coding not null values : ***************************************')
 not_null_val = []
+null_val = []
 for val in zigza_value:
     if(val != 0.0):
         not_null_val.append(val)
+    else:
+        null_val.append(0)
+print(null_val)
 
-huffman_coding(not_null_val)
+huffmancode, freq = huffman_coding(not_null_val)
+bit_stream_not_null = []
+for i in not_null_val:
+    if (i in huffmancode):
+        bit_stream_not_null.append(huffmancode[i])
+    else:
+        bit_stream_not_null.append(i)
+print("bit_stream")
+# print(bit_stream_not_null)
 
 print('Coding null values : ***************************************')
-def encode_message(message):
-    encoded_string = ""
+def encode_rle(message):
+    encoded_string = []
     i = 0
     while (i <= len(message)-1):
         count = 1
@@ -342,8 +365,36 @@ def encode_message(message):
             else: 
                 break
         if (ch == 0.0):
-            encoded_string = encoded_string + str(count) + '#'
+            encoded_string.append('#' + str(count))
+        else:
+            encoded_string.append(str(ch))
         i = j + 1
     return encoded_string
 
-print(encode_message(zigza_value))
+bit_stream_null = encode_rle(null_val)
+# print(bit_stream_not_null)
+
+bit_stream = bit_stream_not_null + bit_stream_null
+
+
+print('Conperession percentage : ***************************************')
+def TotalGain(bit_stream, only_bit_stream): 
+    my_array = [str(value) for value in img_original]
+    beforeCompressionValue = len(''.join(my_array)) * 8
+    print(beforeCompressionValue)
+    my_array2 = [str(value) for value in bit_stream]
+    afterCompressionValue = len(''.join(my_array2)) * 8
+
+    ratio1 = (beforeCompressionValue - afterCompressionValue) / beforeCompressionValue
+    percent1 = round(ratio1 * 100, 2)
+    print(str(afterCompressionValue)+ ' : %'+ str(percent1))
+
+    my_array3 = [str(value) for value in only_bit_stream]
+    afterCompressionValueOnly = len(''.join(my_array3)) * 8
+
+    ratio2 = (beforeCompressionValue - afterCompressionValueOnly) / beforeCompressionValue
+    percent2 = round(ratio2 * 100, 2)
+    print(str(afterCompressionValueOnly)+ ' : %'+ str(percent2))
+
+
+TotalGain(bit_stream, only_bit_stream)
