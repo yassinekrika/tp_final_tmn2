@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 import math
-import os
 
 img = cv2.imread('m.bmp', cv2.IMREAD_GRAYSCALE)
 img_original = cv2.imread('m.bmp', cv2.IMREAD_GRAYSCALE)
@@ -207,13 +206,13 @@ def iquantdct(image_data, quant):
     return img
 
 quant= [[16, 11, 10, 16, 24, 40, 51, 61],
-          [12, 12, 14, 19, 26, 58, 60, 55],
-          [14, 13, 16, 24, 40, 57, 69, 56],
-          [14, 17, 22, 29, 51, 87, 80, 62],
-          [18, 22, 37, 56, 68, 109, 103, 77],
-          [24, 35, 55, 64, 81, 104, 113, 92],
-          [49, 64, 78, 87, 103, 121, 120, 101],
-          [72, 92, 95, 98, 112, 100, 103, 99]]
+        [12, 12, 14, 19, 26, 58, 60, 55],
+        [14, 13, 16, 24, 40, 57, 69, 56],
+        [14, 17, 22, 29, 51, 87, 80, 62],
+        [18, 22, 37, 56, 68, 109, 103, 77],
+        [24, 35, 55, 64, 81, 104, 113, 92],
+        [49, 64, 78, 87, 103, 121, 120, 101],
+        [72, 92, 95, 98, 112, 100, 103, 99]]
 
 img_qunt = quantdct(img_original, quant, alpha=1)
 print('block quantife : ***************************************')
@@ -223,6 +222,8 @@ img_iqunt = iquantdct(img_qunt, quant)
 print('block iquantife : ***************************************')
 print(img_iqunt[0:8, 0:8])
 
+
+print('zig-zag : ***************************************')
 def zigzag(matrice):
     l,c=matrice.shape
     i = 0
@@ -253,11 +254,10 @@ def zigzag(matrice):
         i+=1
     return li 
 
-
 zigza_value = zigzag(img_qunt)
 # print(zigza_value)
 
-# huffman coding
+print('Huffman coding : ***************************************')
 class NodeTree(object):
 
     def __init__(self, left=None, right=None):
@@ -316,8 +316,6 @@ def huffman_coding(zigza_value):
     # print(huffmanCode)
     return huffmanCode, frequency
 
-
-print('Huffman coding : ***************************************')
 string = 'asdf;lakjfioquwrlksajdfoijz'
 huffman_coding(string)
 only_huffman_coding, only_freq = huffman_coding(zigza_value)
@@ -363,7 +361,7 @@ bit_stream = encode_rle(zigza_value)
 # print(bit_stream)
 
 print('Conperession percentage : ***************************************')
-def TotalGain(bit_stream, only_bit_stream): 
+def percentage(bit_stream, only_bit_stream): 
     my_array = [str(value) for value in img_original]
     beforeCompressionValue = len(''.join(my_array)) * 8
     print('before comperession '+str(beforeCompressionValue))
@@ -382,4 +380,4 @@ def TotalGain(bit_stream, only_bit_stream):
     print('code everything in HF '+str(afterCompressionValueOnly)+ ' : %'+ str(percent2))
 
 
-TotalGain(bit_stream, only_bit_stream)
+percentage(bit_stream, only_bit_stream)
