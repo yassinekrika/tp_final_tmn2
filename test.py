@@ -1,133 +1,101 @@
-# Node of a Huffman Tree  
-class Nodes:  
-    def __init__(self, probability, symbol, left = None, right = None):  
-        # probability of the symbol  
-        self.probability = probability  
-  
-        # the symbol  
-        self.symbol = symbol  
-  
-        # the left node  
-        self.left = left  
-  
-        # the right node  
-        self.right = right  
-  
-        # the tree direction (0 or 1)  
-        self.code = ''  
-  
-""" A supporting function in order to calculate the probabilities of symbols in specified data """  
-def CalculateProbability(the_data):  
-    the_symbols = dict()  
-    for item in the_data:  
-        if the_symbols.get(item) == None:  
-            the_symbols[item] = 1  
-        else:   
-            the_symbols[item] += 1       
-    return the_symbols  
-  
-""" A supporting function in order to print the codes of symbols by travelling a Huffman Tree """  
-the_codes = dict()  
-  
-def CalculateCodes(node, value = ''):  
-    # a huffman code for current node  
-    newValue = value + str(node.code)  
-  
-    if(node.left):  
-        CalculateCodes(node.left, newValue)  
-    if(node.right):  
-        CalculateCodes(node.right, newValue)  
-  
-    if(not node.left and not node.right):  
-        the_codes[node.symbol] = newValue  
-           
-    return the_codes  
-  
-""" A supporting function in order to get the encoded result """  
-def OutputEncoded(the_data, coding):  
-    encodingOutput = []  
-    for element in the_data:  
-        # print(coding[element], end = '')  
-        encodingOutput.append(coding[element])  
-          
-    the_string = ''.join([str(item) for item in encodingOutput])      
-    return the_string  
-          
-""" A supporting function in order to calculate the space difference between compressed and non compressed data"""      
-def TotalGain(the_data, coding):  
-    # total bit space to store the data before compression  
-    beforeCompression = len(the_data) * 8  
-    afterCompression = 0  
-    the_symbols = coding.keys()  
-    for symbol in the_symbols:  
-        the_count = the_data.count(symbol)  
-        # calculating how many bit is required for that symbol in total  
-        afterCompression += the_count * len(coding[symbol])  
-    print("Space usage before compression (in bits):", beforeCompression)  
-    print("Space usage after compression (in bits):",  afterCompression)  
-  
-def HuffmanEncoding(the_data):  
-    symbolWithProbs = CalculateProbability(the_data)  
-    the_symbols = symbolWithProbs.keys()  
-    the_probabilities = symbolWithProbs.values()  
-    print("symbols: ", the_symbols)  
-    print("probabilities: ", the_probabilities)  
-      
-    the_nodes = []  
-      
-    # converting symbols and probabilities into huffman tree nodes  
-    for symbol in the_symbols:  
-        the_nodes.append(Nodes(symbolWithProbs.get(symbol), symbol))  
-      
-    while len(the_nodes) > 1:  
-        # sorting all the nodes in ascending order based on their probability  
-        the_nodes = sorted(the_nodes, key = lambda x: x.probability)  
-        # for node in nodes:    
-        #      print(node.symbol, node.prob)  
-      
-        # picking two smallest nodes  
-        right = the_nodes[0]  
-        left = the_nodes[1]  
-      
-        left.code = 0  
-        right.code = 1  
-      
-        # combining the 2 smallest nodes to create new node  
-        newNode = Nodes(left.probability + right.probability, left.symbol + right.symbol, left, right)  
-      
-        the_nodes.remove(left)  
-        the_nodes.remove(right)  
-        the_nodes.append(newNode)  
-              
-    huffmanEncoding = CalculateCodes(the_nodes[0])  
-    print("symbols with codes", huffmanEncoding)  
-    TotalGain(the_data, huffmanEncoding)  
-    encodedOutput = OutputEncoded(the_data,huffmanEncoding)  
-    return encodedOutput, the_nodes[0]  
-   
-def HuffmanDecoding(encodedData, huffmanTree):  
-    treeHead = huffmanTree  
-    decodedOutput = []  
-    for x in encodedData:  
-        if x == '1':  
-            huffmanTree = huffmanTree.right     
-        elif x == '0':  
-            huffmanTree = huffmanTree.left  
-        try:  
-            if huffmanTree.left.symbol == None and huffmanTree.right.symbol == None:  
-                pass  
-        except AttributeError:  
-            decodedOutput.append(huffmanTree.symbol)  
-            huffmanTree = treeHead  
-          
-    string = ''.join([str(item) for item in decodedOutput])  
-    return string  
-  
-the_data = "#5bbbbb#4bbbb#4ccc"  
-print(the_data)  
-encoding, the_tree = HuffmanEncoding(the_data)  
-print("Encoded output", encoding)  
-print("Decoded Output", HuffmanDecoding(encoding, the_tree))  
+import numpy as np
+class NodeTree(object):
+
+    def __init__(self, left=None, right=None):
+        self.left = left
+        self.right = right
+
+    def children(self):
+        return (self.left, self.right)
+
+    def nodes(self):
+        return (self.left, self.right)
+
+    def __str__(self):
+        return '%s_%s' % (self.left, self.right)
+
+def huffman_coding(zigza_value):
+
+    string = zigza_value
+
+    def huffman_code_tree(node):
+        codes = {}
+
+        def traverse(node, code):
+            if type(node) is int or type(node) is np.float64 or type(node) is str:
+                codes[node] = code
+            else:
+                traverse(node.left, code + '0')
+                traverse(node.right, code + '1')
+
+        traverse(node, '')
+        return codes
+
+    # Calculating frequency
+    freq = {}
+    for c in string:
+        if c in freq:
+            freq[c] += 1
+        else:
+            freq[c] = 1
+    frequency = freq
+    freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)
+    
+    nodes = freq
+
+    while len(nodes) > 1:
+        (key1, c1) = nodes[-1]
+        (key2, c2) = nodes[-2]
+        nodes = nodes[:-2]
+        node = NodeTree(key1, key2)
+        nodes.append((node, c1 + c2))
+
+        nodes = sorted(nodes, key=lambda x: x[1], reverse=True)
+
+    huffmanCode = huffman_code_tree(nodes[0][0])
+
+    # print(huffmanCode)
+    return huffmanCode, frequency  
+
+def encode_rle(message):
+    encoded_string = []
+    i = 0
+    while i < len(message):
+        if message[i] != 0:
+            # Concatenate non-zero values until a 0 is encountered
+            j = i
+            while j < len(message) and message[j] != 0:
+                j += 1
+            encoded_string.append(''.join(str(x) for x in message[i:j]))
+            i = j
+        else:
+            # Count consecutive zeros and add to output
+            count = 1
+            j = i + 1
+            while j < len(message) and message[j] == 0:
+                count += 1
+                j += 1
+            encoded_string.append('#' + str(count))
+            i = j
+    return encoded_string
+
+bit_stream_null = encode_rle([0, 0, 0, 0, 3, 4, 3, 0, 0, 0, 0, 6, 5, 0]) 
+print(bit_stream_null)
+
+def reverse_decode_rle(encoded_message):
+    decoded_string = []
+    for code in encoded_message:
+        if code[0] == '#':
+            # Decode consecutive zeros
+            count = int(code[1:])
+            decoded_string += [0] * count
+        else:
+            # Decode concatenated non-zero values
+            decoded_string += [int(x) for x in code]
+    return decoded_string
+
+reverse = reverse_decode_rle(['#4', '343', '#4', '65', '#1']) 
+print(reverse)
 
 # '000000bbbbb00000bbbb0000ccc' => 216 39 82% only huffman
 # '#5bbbbb#4bbbb#4ccc' => 144 60 58% rle + huffman

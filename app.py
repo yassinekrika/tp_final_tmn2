@@ -257,7 +257,6 @@ def zigzag(matrice):
 zigza_value = zigzag(img_qunt)
 # print(zigza_value)
 
-
 # huffman coding
 class NodeTree(object):
 
@@ -317,8 +316,9 @@ def huffman_coding(zigza_value):
     # print(huffmanCode)
     return huffmanCode, frequency
 
-string = 'asdf;lakjfioquwrlksajdfoijz'
+
 print('Huffman coding : ***************************************')
+string = 'asdf;lakjfioquwrlksajdfoijz'
 huffman_coding(string)
 only_huffman_coding, only_freq = huffman_coding(zigza_value)
 only_bit_stream = []
@@ -327,74 +327,59 @@ for i in zigza_value:
         only_bit_stream.append(only_huffman_coding[i])
     else:
         only_bit_stream.append(i)
-print("only_bit_stream")
-# print(only_bit_stream)
 
-print('Huffman coding not null values : ***************************************')
-not_null_val = []
-null_val = []
-for val in zigza_value:
-    if(val != 0.0):
-        not_null_val.append(val)
-    else:
-        null_val.append(0)
-print(null_val)
-
-huffmancode, freq = huffman_coding(not_null_val)
-bit_stream_not_null = []
-for i in not_null_val:
-    if (i in huffmancode):
-        bit_stream_not_null.append(huffmancode[i])
-    else:
-        bit_stream_not_null.append(i)
-print("bit_stream")
-# print(bit_stream_not_null)
-
-print('Coding null values : ***************************************')
+print('Huffman coding not null values and RLE coding null values : ***************************************')
 def encode_rle(message):
     encoded_string = []
     i = 0
-    while (i <= len(message)-1):
-        count = 1
-        ch = message[i]
-        j = i
-        while (j < len(message)-1):    
-            if (message[j] == message[j + 1]): 
-                count = count + 1
-                j = j + 1
-            else: 
-                break
-        if (ch == 0.0):
-            encoded_string.append('#' + str(count))
+    while i < len(message):
+        if message[i] != 0:
+            # Concatenate non-zero values until a 0 is encountered
+            j = i
+            while j < len(message) and message[j] != 0:
+                j += 1
+            string = ''.join(str(x) for x in message[i:j])
+            hf, freq = huffman_coding(string)
+            bit_stream = ''
+
+            for i in string:
+                if (i in hf):
+                    bit_stream += hf[i]
+            
+            encoded_string.append(bit_stream)
+            i = j
         else:
-            encoded_string.append(str(ch))
-        i = j + 1
+            # Count consecutive zeros and add to output
+            count = 1
+            j = i + 1
+            while j < len(message) and message[j] == 0:
+                count += 1
+                j += 1
+            encoded_string.append('#' + str(count))
+            i = j
     return encoded_string
 
-bit_stream_null = encode_rle(null_val)
-# print(bit_stream_not_null)
-
-bit_stream = bit_stream_not_null + bit_stream_null
-
+bit_stream = encode_rle(zigza_value)
+# print(bit_stream)
 
 print('Conperession percentage : ***************************************')
 def TotalGain(bit_stream, only_bit_stream): 
     my_array = [str(value) for value in img_original]
     beforeCompressionValue = len(''.join(my_array)) * 8
-    print(beforeCompressionValue)
+    print('before comperession '+str(beforeCompressionValue))
     my_array2 = [str(value) for value in bit_stream]
     afterCompressionValue = len(''.join(my_array2)) * 8
 
     ratio1 = (beforeCompressionValue - afterCompressionValue) / beforeCompressionValue
     percent1 = round(ratio1 * 100, 2)
-    print(str(afterCompressionValue)+ ' : %'+ str(percent1))
+    print('code null and not null '+str(afterCompressionValue)+ ' : %'+ str(percent1))
 
     my_array3 = [str(value) for value in only_bit_stream]
     afterCompressionValueOnly = len(''.join(my_array3)) * 8
 
     ratio2 = (beforeCompressionValue - afterCompressionValueOnly) / beforeCompressionValue
     percent2 = round(ratio2 * 100, 2)
-    print(str(afterCompressionValueOnly)+ ' : %'+ str(percent2))
+    print('code everything in HF '+str(afterCompressionValueOnly)+ ' : %'+ str(percent2))
 
 
 TotalGain(bit_stream, only_bit_stream)
